@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Home Page{% endblock %}
+{% block content %}
+
+<h1 class="py-3 container">All Students List</h1>
+<div class="d-flex flex-wrap justify-content-between container ">
+    {% for student in students %}
+        <div class="card col-3 mb-3">
+          <div class="row g-0">
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">{{ student.name }}</h5>
+                <p class="card-text">Id: {{ student.id }}</p>
+                <p class="card-text">Email: {{ student.email }}</p>
+                <p class="card-text">Phone: {{ student.phone }}</p>
+                <p class="card-text">Course: {{ student.course }}</p>
+                <a href="{% url 'update_student' id=student.id %}"class="btn btn-warning">Edit</a>
+                <a href="{% url 'delete_student' id=student.id %}" class="btn btn-danger">Delete</a>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endfor %} 
+{% endblock %}
