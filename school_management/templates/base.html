@@ -17,6 +17,7 @@
     <title>{% block title %} {% endblock %}</title>
   </head>
   <body>
+
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">Navbar</a>
@@ -34,52 +35,37 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'create_student' %}">Create Student</a>
-              </li>
-              <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                id="navbarDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+              <a class="nav-link active" aria-current="page" href="{% url 'home' %}"
+                >Home</a
               >
-                Dropdown
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </li>
-              </ul>
             </li>
             <li class="nav-item">
-              <a
-                class="nav-link disabled"
-                href="#"
-                tabindex="-1"
-                aria-disabled="true"
-                >Disabled</a
-              >
+              <a class="nav-link" href="{% url 'create_student' %}">
+                Create Student
+              </a>
             </li>
+
           </ul>
-          <form class="d-flex">
-            <input
-              class="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-            />
-            <button class="btn btn-outline-success" type="submit">
-              Search
-            </button>
-          </form>
+          {% if user.is_authenticated %}
+          <div class="d-flex">
+            <a href="{% url 'user_profile' %}">{{user.username}}</a>
+
+      
+            <a href="{% url 'user_logout'%}" class='btn btn-success mx-3' >
+              Logout
+            </a>
+        </div>
+          {% else %}
+          <div class="d-flex">
+            <a href="{% url 'signup'%}" class='btn btn-success mx-3' >
+              Sign in
+            </a>
+            <a href="{% url 'user_login' %}" class='btn btn-danger mx-3' >
+              Login
+            </a>
+
+        </div>
+          {% endif %}
         </div>
       </div>
     </nav>

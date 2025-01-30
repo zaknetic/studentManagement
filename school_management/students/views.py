@@ -4,6 +4,11 @@ from. import forms
 from django.contrib import messages
 from django.views.generic import ListView,UpdateView, DeleteView,CreateView
 from django.urls import reverse_lazy
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
@@ -38,11 +43,14 @@ def create_student(request):
         form = forms.StudentForm()
     return render(request, 'students/create_student.html', {'form': form})
 
-class CreatStudent(CreateView):
+class CreatStudent(LoginRequiredMixin,CreateView):
     form_class = forms.StudentForm
     success_url = reverse_lazy('home')
     template_name ='students/create_student.html'
     def form_valid(self, form):
+        student = form.save(commit=False)
+        student.user = self.request.user
+        student.save()
         messages.add_message(self.request, messages.SUCCESS, 'Student Created successfully.')
         return super().form_valid(form)
 
@@ -70,7 +78,7 @@ def update_student(request,id):
     return render(request, 'students/create_student.html', {'form': form,'edit': True})
 
 
-class UpdaeStudent(UpdateView):
+class UpdaeStudent(LoginRequiredMixin,UpdateView):
     form_class = forms.StudentForm
     model = models.Student
     template_name ='students/create_student.html'
@@ -91,7 +99,7 @@ def delete_student(request,id):
     messages.add_message(request, messages.SUCCESS, 'Deleted successfully.')
     return redirect('home')
 
-class DeleteStudent(DeleteView):
+class DeleteStudent( LoginRequiredMixin,DeleteView):
     model = models.Student
     pk_url_kwarg = 'id'
     success_url = reverse_lazy('home')
@@ -100,3 +108,64 @@ class DeleteStudent(DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.add_message(self.request, messages.SUCCESS, 'Deleted successfully.')
         return super().delete(request, *args, **kwargs)
+    
+# def signup(request):
+#     if request.method == 'POST':
+#         form = forms.SignUpForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.add_message(request, messages.SUCCESS, 'Account created successfully.')
+#             return redirect('home')
+#         else:
+#             form = forms.SignUpForm()
+#         return render(request, 'students/auth_form.html', {'form': form})
+
+
+def signup(request):
+          if request.method == 'POST':
+               form = forms.SignUpForm(request.POST)
+               if form.is_valid():
+                    form.save()
+                    messages.add_message(request, messages.SUCCESS, 'User Created successfully.')
+                    return redirect('home')
+          else:
+               form = forms.SignUpForm()
+
+          return render(request,'students/auth_form.html',{'form':form})
+
+
+
+def user_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.add_message(request, messages.SUCCESS, 'User logged in successfully.')
+                return redirect('home')
+            else:
+                messages.add_message(request, messages.ERROR, 'Invalid username or password.')
+        else:
+            messages.add_message(request, messages.ERROR, 'Form validation failed. Please try again.')
+    
+    else:  # Handle GET requests
+        form = AuthenticationForm()
+
+    # Render the login page for both GET and POST (if form is invalid)
+    return render(request, 'students/auth_form.html', {'form': form})
+
+
+def user_logout(request):
+    logout(request)
+    messages.add_message(request, messages.SUCCESS, 'User logged out successfully.')
+    return redirect('home')
+
+
+@login_required
+def user_profile(request):
+     students = models.Student.objects.filter(user=request.user)
+     return render(request,"students/profile.html", {'students':students})
+
